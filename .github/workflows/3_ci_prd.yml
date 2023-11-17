@@ -7,7 +7,7 @@ on:
       - '*' # Push events to matching tags only
 env:
   IMAGE: "eu.gcr.io/entur-system-1287/hest-er-best"
-  VERSION: "pr-12"
+  VERSION: "pr-2"
   ENV: "prd"
 
 jobs:
@@ -36,6 +36,7 @@ jobs:
           if [[ $(git status --porcelain .) ]]; then
             git config --global user.name "@github-actions-bot"
             git config --global user.email "github-actions-bot@users.noreply.github.com"
+            git config --global --add --bool push.autoSetupRemote true
             git checkout -b "prod-release-${{ env.VERSION }}"
             git add .
             git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
