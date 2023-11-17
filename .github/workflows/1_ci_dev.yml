@@ -5,7 +5,7 @@ on:
       - "main"
 env:
   IMAGE: "eu.gcr.io/entur-system-1287/hest-er-best"
-  VERSION: "pr-12"
+  VERSION: "pr-11"
   ENV: "dev"
 
 jobs:
