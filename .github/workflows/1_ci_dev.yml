@@ -37,11 +37,12 @@ jobs:
             git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
             git push
             echo "::set-output name=pushed::true"
+            echo "pushed=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=pushed::false"
+            echo "pushed=false" >> $GITHUB_OUTPUT
           fi
       - name: Version
-        if: steps.git-push-changes.outputs.pushed != 'true'
+        if: steps.git-push-changes.outputs.pushed == 'true'
         id: version
         uses: juliansangillo/tag-version@v1
         with:
