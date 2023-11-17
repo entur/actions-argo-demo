@@ -27,11 +27,13 @@ jobs:
       - name: "Push Updated Image Tag ${{ env.ENV }}"
         working-directory: ".argo/hestekur/overlays/${{ env.ENV }}"
         run: |
-          git add .
-          git config --global user.name "@github-actions-bot"
-          git config --global user.email "github-actions-bot@users.noreply.github.com"
-          git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
-          git push
+          if [[ $(git status --porcelain .) ]]; then
+            git add .
+            git config --global user.name "@github-actions-bot"
+            git config --global user.email "github-actions-bot@users.noreply.github.com"
+            git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
+            git push
+          fi
       - name: Semantic Tag
         uses: cycjimmy/semantic-release-action@v3
         id: semantic
@@ -44,3 +46,4 @@ jobs:
         run: |
           echo "_____________________________________________________________"
           echo "Semantic Tag: ${{ steps.semantic.outputs.new_release_git_tag }}"
+          echo "_____________________________________________________________"
