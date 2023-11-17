@@ -1,7 +1,10 @@
 name: "Prod release"
 on:
   push:
-    tags: [ 'v*.*.*.MAIN' ]
+    branches:
+      - main
+    tags:
+      - '*' # Push events to matching tags only
 env:
   IMAGE: "eu.gcr.io/entur-system-1287/hest-er-best"
   VERSION: "pr-12"
