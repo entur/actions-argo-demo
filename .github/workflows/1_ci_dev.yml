@@ -34,17 +34,16 @@ jobs:
             git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
             git push
           fi
-      - name: Semantic Tag
-        uses: cycjimmy/semantic-release-action@v3
-        id: semantic
-        with:
-          branch: 'main'
-          semantic_version: 19
-          extra_plugins: |
-            @semantic-release/commit-analyzer
-            @semantic-release/git
-      - name: Do something when a new release published
-        run: |
-          echo "_____________________________________________________________"
-          echo "Semantic Tag: ${{ steps.semantic.outputs.new_release_git_tag }}"
-          echo "_____________________________________________________________"
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+          fetch-depth: 0
+
+    - name: Version
+      id: version
+      uses: juliansangillo/tag-version@v1
+      with:
+          dev-branch: main
