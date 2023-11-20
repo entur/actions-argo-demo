@@ -32,27 +32,29 @@ jobs:
       statuses: none
     runs-on: "ubuntu-latest"
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+          disable-sudo: true
+#          egress-policy: block
+#          allowed-endpoints: >
+#            api.github.com:443
+#            github.com:443
+#            static.rust-lang.org:443
+#            uploads.github.com:443
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
           fetch-depth: 0
           show-progress: false
-      - name: Install latest rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          default: true
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
       - name: Install musl target
         run: rustup target add x86_64-unknown-linux-musl
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - run: rustup target add x86_64-unknown-linux-musl
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --all --release --target=x86_64-unknown-linux-musl
+      - run: cargo build --all --release --target=x86_64-unknown-linux-musl
       - name: Prepare Binary
         run: |
           # reduce size
@@ -61,8 +63,6 @@ jobs:
           mv target/x86_64-unknown-linux-musl/release/hello-github-actions target/release/hello-github-actions-musl
           # make executable
           chmod +x target/release/hello-github-actions-musl
-
-      # TODO
       - name: "Authenticate with Google Cloud"
         id: 'auth'
         uses: 'google-github-actions/auth@v1'
@@ -110,6 +110,10 @@ jobs:
     needs: docker-build
     runs-on: "ubuntu-latest"
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
