@@ -15,6 +15,20 @@ env:
 jobs:
   docker-build:
     name: "Build Docker Image"
+    permissions: # TODO: scope down permissions
+      contents: 'write'  # for google auth
+      id-token: 'write' # for google auth
+      actions: read
+      checks: read
+      deployments: write
+      issues: none
+      discussions: none
+      packages: write
+      pages: none
+      pull-requests: write
+      repository-projects: read
+      security-events: none
+      statuses: write
     runs-on: "ubuntu-latest"
     steps:
       - name: "Git checkout"
