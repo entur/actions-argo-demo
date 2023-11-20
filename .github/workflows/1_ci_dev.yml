@@ -12,6 +12,7 @@ env:
   WORKLOAD_IDENTITY_PROVIDER: "projects/475080371789/locations/global/workloadIdentityPools/poc-gh-actions-pool/providers/poc-gh-actions-provider"
   SERVICE_ACCOUNT: "github-actions-poc@ent-getstarted-sbx.iam.gserviceaccount.com"
   IMAGE_PATH: "ent-getstarted-sbx/getting-started-github-actions/hello-github-actions"
+
 jobs:
   docker-build:
     name: "Build Docker Image"
@@ -139,10 +140,21 @@ jobs:
           else
             echo "pushed=false" >> $GITHUB_OUTPUT
           fi
-      - name: Create CHANGELOG
+      - name: Get previous tag
+        id: previousTag
+        run: |
+          name=$(git --no-pager tag --sort=creatordate --merged ${{ github.ref_name }} | tail -2 | head -1)
+          echo "previousTag: $name"
+          echo "previousTag=$name" >> $GITHUB_OUTPUT
+      - name: Update CHANGELOG
         id: changelog
-        uses: Requarks/changelog-action@v1
+        uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
-          excludeTypes: build,docs,other,style,chore(deps)
+          fromTag: ${{ github.ref_name }}
+          toTag: ${{ steps.previousTag.outputs.previousTag }}
+          writeToFile: true
+          reverseOrder: true
+          excludeTypes: build,docs,other,style,chore(deps),ci,refactor,test
+
+
