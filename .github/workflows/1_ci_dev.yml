@@ -5,7 +5,7 @@ on:
       - "main"
 env:
   ENV: "dev"
-  VERSION: "v0.2.0-build+${{github.run_number}}.${{ github.run_attempt }}"  # TODO get version from releases (include drafts)
+  VERSION: "v0.2.0-build.${{github.run_number}}.${{ github.run_attempt }}"  # TODO get version from releases (include drafts)
   CARGO_TERM_COLOR: always
   PROJECT_ID: ent-getstarted-sbx
   DOCKER_URL: europe-west1-docker.pkg.dev
