@@ -15,20 +15,20 @@ env:
 jobs:
   docker-build:
     name: "Build Docker Image"
-    permissions: # TODO: scope down permissions
+    permissions:
       contents: 'write'  # for google auth
       id-token: 'write' # for google auth
-      actions: read
-      checks: read
-      deployments: write
+      actions: none
+      checks: none
+      deployments: none
       issues: none
       discussions: none
-      packages: write
+      packages: none
       pages: none
-      pull-requests: write
-      repository-projects: read
+      pull-requests: none
+      repository-projects: none
       security-events: none
-      statuses: write
+      statuses: none
     runs-on: "ubuntu-latest"
     steps:
       - name: "Git checkout"
@@ -71,7 +71,7 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
       # Docker config
-      - name: 'Configure Docker with gcloud auth'  # TODO: use variable for region
+      - name: 'Configure Docker with gcloud auth'
         run: gcloud --quiet auth configure-docker ${{env.DOCKER_URL}}
       # Docker build
       - name: "Docker Build"
@@ -89,7 +89,21 @@ jobs:
           docker push -a "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}"
 
   update-image-tag:
-    name: "Update Image Tag"
+    name: "Update Image & Tag"
+    permissions:
+      contents: 'write'
+      id-token: 'none'
+      actions: none
+      checks: none
+      deployments: none
+      issues: none
+      discussions: none
+      packages: none
+      pages: none
+      pull-requests: none
+      repository-projects: none
+      security-events: none
+      statuses: none
     needs: docker-build
     runs-on: "ubuntu-latest"
     steps:
