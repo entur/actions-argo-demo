@@ -150,11 +150,9 @@ jobs:
             git config --global user.email "github-actions-bot@users.noreply.github.com"
             git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
             git tag -a "${{ env.VERSION }}" -m "Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }}"
-            git tag -a "${{ env.ENV }}" -m "Update environment tag ${{ env.ENV }}"
             git push --tags
             echo "pushed=true" >> $GITHUB_OUTPUT
           else
             echo "pushed=false" >> $GITHUB_OUTPUT
             echo "NB: No image change, will not create PR"
           fi
-
