@@ -120,7 +120,23 @@ jobs:
           setup-tools: |
             kustomize
           kustomize: '5.2.1'
-      - name: "Update Deployment Image Tag" # [3]
+      - name: Get previous tag
+        id: previousTag
+        run: |
+          name=$(git --no-pager tag --sort=creatordate --merged ${{ github.ref_name }} | tail -2 | head -1)
+          echo "previousTag: $name"
+          echo "previousTag=$name" >> $GITHUB_OUTPUT
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          fromTag: ${{ github.ref_name }}
+          toTag: ${{ steps.previousTag.outputs.previousTag }}
+          writeToFile: true
+          reverseOrder: true
+          excludeTypes: build,docs,other,style,chore(deps),ci,refactor,test
+      - name: "Update Deployment Image Tag"
         working-directory: ".argo/hestekur/overlays/${{ env.ENV }}"
         run: |
           kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
@@ -139,22 +155,6 @@ jobs:
             echo "pushed=true" >> $GITHUB_OUTPUT
           else
             echo "pushed=false" >> $GITHUB_OUTPUT
+            echo "NB: No image change, will not create PR"
           fi
-      - name: Get previous tag
-        id: previousTag
-        run: |
-          name=$(git --no-pager tag --sort=creatordate --merged ${{ github.ref_name }} | tail -2 | head -1)
-          echo "previousTag: $name"
-          echo "previousTag=$name" >> $GITHUB_OUTPUT
-      - name: Update CHANGELOG
-        id: changelog
-        uses: requarks/changelog-action@v1
-        with:
-          token: ${{ github.token }}
-          fromTag: ${{ github.ref_name }}
-          toTag: ${{ steps.previousTag.outputs.previousTag }}
-          writeToFile: true
-          reverseOrder: true
-          excludeTypes: build,docs,other,style,chore(deps),ci,refactor,test
-
 
