@@ -3,8 +3,7 @@ on:
   push:
     branches:
       - main
-    tags:
-      - '*' # Push events to matching tags only
+    tags: ["v[0-9].[0-9]+.[0-9]+.DEV"]
 env:
   IMAGE: "eu.gcr.io/entur-system-1287/hest-er-best"
   VERSION: "pr-2"
@@ -12,7 +11,7 @@ env:
 
 jobs:
   update-image-tag:
-    name: "Update Image"
+    name: "Update Image Prod"
     runs-on: "ubuntu-latest"
     steps:
       - name: "Git checkout"
