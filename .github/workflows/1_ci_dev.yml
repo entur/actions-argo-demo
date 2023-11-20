@@ -32,9 +32,10 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Git checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
         with:
           fetch-depth: 0
+          show-progress: false
       - name: Install latest rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -80,6 +81,7 @@ jobs:
             --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:latest" \
             --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{github.sha}}" \
             --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{env.VERSION}}" \
+            --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{env.ENV}}_${{env.VERSION}}" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
@@ -108,9 +110,10 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Git checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
         with:
           fetch-depth: 0
+          show-progress: false
       - uses: yokawasa/action-setup-kube-tools@v0.9.2
         with:
           setup-tools: |
@@ -143,4 +146,3 @@ jobs:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
           excludeTypes: build,docs,other,style,chore(deps)
-
