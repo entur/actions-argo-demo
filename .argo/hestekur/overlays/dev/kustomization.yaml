@@ -21,4 +21,4 @@ helmCharts:
 images:
 - name: app-image
   newName: europe-west1-docker.pkg.dev/ent-getstarted-sbx/getting-started-github-actions/hello-github-actions
-  newTag: v0.1.23.1
+  newTag: v0.1.27.1
