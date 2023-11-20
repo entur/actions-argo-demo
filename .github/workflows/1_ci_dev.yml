@@ -120,19 +120,11 @@ jobs:
         uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
         with:
           disable-sudo: true
-          egress-policy: block  # audit
+          egress-policy: block
           allowed-endpoints: >
-            auth.docker.io:443
-            dl.google.com:443
-            europe-west1-docker.pkg.dev:443
+            api.github.com:443
             github.com:443
-            iamcredentials.googleapis.com:443
-            index.crates.io:443
-            production.cloudflare.docker.com:443
-            raw.githubusercontent.com:443
-            registry-1.docker.io:443
-            static.rust-lang.org:443
-            sts.googleapis.com:443
+            objects.githubusercontent.com:443
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
@@ -169,6 +161,7 @@ jobs:
         run: |
           if [[ $(git status --porcelain .) ]]; then
             git add .
+            git add ../../../../CHANGELOG.md
             git config --global user.name "@github-actions-bot"
             git config --global user.email "github-actions-bot@users.noreply.github.com"
             git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
