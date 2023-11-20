@@ -5,7 +5,7 @@ on:
       - "main"
 env:
   ENV: "dev"
-  VERSION: "v0.1.${{github.run_number}}.${{ github.run_attempt }}"
+  VERSION: "v0.2.0-build+${{github.run_number}}.${{ github.run_attempt }}"  # TODO get version from releases (include drafts)
   CARGO_TERM_COLOR: always
   PROJECT_ID: ent-getstarted-sbx
   DOCKER_URL: europe-west1-docker.pkg.dev
@@ -89,6 +89,7 @@ jobs:
             --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{github.sha}}" \
             --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{env.VERSION}}" \
             --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{env.ENV}}_${{env.VERSION}}" \
+            --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{env.ENV}}_latest" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
@@ -151,24 +152,38 @@ jobs:
           writeToFile: true
           reverseOrder: true
           excludeTypes: build,docs,other,style,chore(deps),ci,refactor,test
+      - name: Commit CHANGELOG.md
+        if: ${{ !env.ACT }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
+          file_pattern: CHANGELOG.md
       - name: "Update Deployment Image Tag"
         working-directory: ".argo/hestekur/overlays/${{ env.ENV }}"
         run: |
           kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
-      - name: "Push Updated Image Tag ${{ env.ENV }}"
-        id: git-push-changes
-        working-directory: ".argo/hestekur/overlays/${{ env.ENV }}"
-        run: |
-          if [[ $(git status --porcelain .) ]]; then
-            git add .
-            git add ../../../../CHANGELOG.md
-            git config --global user.name "@github-actions-bot"
-            git config --global user.email "github-actions-bot@users.noreply.github.com"
-            git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
-            git tag -a "${{ env.VERSION }}" -m "Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }}"
-            git push --tags
-            echo "pushed=true" >> $GITHUB_OUTPUT
-          else
-            echo "pushed=false" >> $GITHUB_OUTPUT
-            echo "NB: No image change, will not create PR"
-          fi
+      # - name: "Push Updated Image Tag ${{ env.ENV }}"
+      #   id: git-push-changes
+      #   working-directory: ".argo/hestekur/overlays/${{ env.ENV }}"
+      #   run: |
+      #     if [[ $(git status --porcelain .) ]]; then
+      #       git add .
+      #       git config --global user.name "@github-actions-bot"
+      #       git config --global user.email "github-actions-bot@users.noreply.github.com"
+      #       git commit -m "feat: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
+      #       git tag -a "${{ env.VERSION }}" -m "Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }}"
+      #       git push --tags
+      #       echo "pushed=true" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "pushed=false" >> $GITHUB_OUTPUT
+      #       echo "NB: No image change, will not create PR"
+      #     fi
+      - name: Commit CHANGELOG.md
+        if: ${{ !env.ACT }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          commit_message: "ci: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
+          tagging_message: "${{ env.VERSION }}"
+          file_pattern: kustomization.yaml
