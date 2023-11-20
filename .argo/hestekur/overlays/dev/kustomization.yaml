@@ -20,5 +20,5 @@ helmCharts:
   version: 1.17.3
 images:
 - name: app-image
-  newName: eu.gcr.io/entur-system-1287/hest-er-best
-  newTag: pr-2
+  newName: europe-west1-docker.pkg.dev/ent-getstarted-sbx/getting-started-github-actions/hello-github-actions
+  newTag: v0.1.21.1
