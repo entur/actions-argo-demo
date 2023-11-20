@@ -140,7 +140,7 @@ jobs:
         id: previousTag
         run: |
           #name=$(git --no-pager tag --sort=creatordate --merged ${{ github.ref_name }} | tail -2 | head -1) #enable --merged when doing pr-s
-          name=$(git --no-pager tag --sort=creatordate ${{ github.ref_name }} | tail -2 | head -1)
+          name=$(git --no-pager tag --sort=creatordate | tail -2 | head -1)
           echo "previousTag: $name"
           echo "previousTag=$name" >> $GITHUB_OUTPUT
       - name: Update CHANGELOG
