@@ -50,6 +50,7 @@ jobs:
             static.rust-lang.org:443
             sts.googleapis.com:443
             crates.io:443
+            static.crates.io:443
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
