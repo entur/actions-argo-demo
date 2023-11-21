@@ -1,8 +1,8 @@
 #!/bin/bash
 APPNAME="hestekur"
-REPO="https://github.com/entur/tmp-actions-with-argo.git"
+REPO="https://github.com/entur/actions-argo-demo.git"
 #DIR="helm/hest-er-best"
-ENVS="dev prd"
+ENVS="dev tst prd"
 # create project
 argocd proj create $APPNAME -f - <<EOF
 apiVersion: argoproj.io/v1alpha1
