@@ -5,12 +5,14 @@ ingress:
   enabled: false
 container:
   cpu: 0.2
-  memory: 256
+  memory: 128
   probes:
     liveness:
-      path: "/greet"
+      path: "/"
     readiness:
-      path: "/greet"
+      path: "/"
   prometheus:
     enabled: false
-env: dev
+env: tst
+deployment:
+  replicas: 4
