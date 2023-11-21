@@ -49,6 +49,7 @@ jobs:
             registry-1.docker.io:443
             static.rust-lang.org:443
             sts.googleapis.com:443
+            crates.io:443
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
@@ -180,11 +181,11 @@ jobs:
       #       echo "pushed=false" >> $GITHUB_OUTPUT
       #       echo "NB: No image change, will not create PR"
       #     fi
-      - name: Commit CHANGELOG.md
+      - name: Commit kustomization and tag version
         if: ${{ !env.ACT }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: main
           commit_message: "ci: Update deployment image tag in ${{ env.ENV }} to ${{ env.VERSION }} [skip ci]"
           tagging_message: "${{ env.VERSION }}"
-          file_pattern: kustomization.yaml
+          file_pattern: .argo/*/overlays/${{env.ENV}}/kustomization.yaml
