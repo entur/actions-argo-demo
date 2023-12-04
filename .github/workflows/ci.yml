@@ -17,12 +17,11 @@ env:
     WORKLOAD_IDENTITY_PROVIDER: "projects/475080371789/locations/global/workloadIdentityPools/poc-gh-actions-pool/providers/poc-gh-actions-provider"
     SERVICE_ACCOUNT: "github-actions-poc@ent-getstarted-sbx.iam.gserviceaccount.com"
     IMAGE_PATH: "ent-getstarted-sbx/getting-started-github-actions/hello-github-actions"
-    DEV_ENV_NAME: "dev"
-    TST_ENV_NAME: "tst"
-    PRD_ENV_NAME: "prd"
+
 jobs:
     build:
-      environment:
+      environment: dev
+      env:
         name: dev
       runs-on: ubuntu-latest
       steps:
@@ -34,7 +33,7 @@ jobs:
       - name: "echo version"
         run: echo $VERSION
       - run: |
-          echo "step env: ${{ jobs.deploy_dev.environment }}"
+          echo "step env: ${{env.name}}"
     deploy_dev:
       environment: dev
       runs-on: ubuntu-latest
