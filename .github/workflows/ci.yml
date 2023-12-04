@@ -62,10 +62,10 @@ jobs:
           with:
             branch: main
             commit_message: "ci: Update deployment image tag in dev to ${{ env.VERSION }} [skip ci]"
-            tagging_message: "${{ env.VERSION }}"
             file_pattern: .argo/*/overlays/dev/kustomization.yaml
     deploy_test:
         environment: tst
+        needs: ["build", "deploy_dev"]
         runs-on: ubuntu-latest
         steps:
           - name: "Git checkout"
@@ -92,10 +92,10 @@ jobs:
             with:
               branch: main
               commit_message: "ci: Update deployment image tag in tst to ${{ env.VERSION }} [skip ci]"
-              tagging_message: "${{ env.VERSION }}"
               file_pattern: .argo/*/overlays/tst/kustomization.yaml
     deploy_prod:
         environment: prd
+        needs: ["build", "deploy_dev", "deploy_test"]
         runs-on: ubuntu-latest
         steps:
           - name: "Git checkout"
@@ -122,5 +122,15 @@ jobs:
             with:
               branch: main
               commit_message: "ci: Update deployment image tag in prd to ${{ env.VERSION }} [skip ci]"
-              tagging_message: "${{ env.VERSION }}"
+              tagging_message: "${{ env.VERSION }}"  # only final step should tag
               file_pattern: .argo/*/overlays/prd/kustomization.yaml
+          - name: Create Release
+            id: create_release
+            uses: actions/create-release@v1
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+              tag_name: ${{ env.VERSION }}
+              release_name: Release ${{ env.VERSION }}
+              draft: false
+              prerelease: false
