@@ -1,0 +1,127 @@
+name: "Build and tag Dev"
+on:
+  push:
+    branches:
+      - "main"
+    tags: # skip loop when tag is pushed
+      - "!v*.*.*-*"
+  pull_request:
+    branches:
+     - "main"
+
+env:
+    VERSION: "v0.2.0-build.${{github.run_number}}.${{ github.run_attempt }}"  # TODO get version from releases (include drafts)
+    CARGO_TERM_COLOR: always
+    PROJECT_ID: ent-getstarted-sbx
+    DOCKER_URL: europe-west1-docker.pkg.dev
+    WORKLOAD_IDENTITY_PROVIDER: "projects/475080371789/locations/global/workloadIdentityPools/poc-gh-actions-pool/providers/poc-gh-actions-provider"
+    SERVICE_ACCOUNT: "github-actions-poc@ent-getstarted-sbx.iam.gserviceaccount.com"
+    IMAGE_PATH: "ent-getstarted-sbx/getting-started-github-actions/hello-github-actions"
+    DEV_ENV_NAME: "dev"
+    TST_ENV_NAME: "tst"
+    PRD_ENV_NAME: "prd"
+jobs:
+    build:
+      environment:
+        name: dev
+      runs-on: ubuntu-latest
+      steps:
+      - name: "Git checkout"
+        uses: "actions/checkout@v4"
+        with:
+          fetch-depth: 0
+          show-progress: false
+      - name: "echo version"
+        run: echo $VERSION
+      - run: |
+          echo "step env: ${{ jobs.deploy_dev.environment }}"
+    deploy_dev:
+      environment: dev
+      runs-on: ubuntu-latest
+      steps:
+        - name: "Git checkout"
+          uses: "actions/checkout@v4"
+          with:
+            fetch-depth: 0
+            show-progress: false
+        - name: "Git checkout"
+          uses: "actions/checkout@v4"
+          with:
+            fetch-depth: 0
+            show-progress: false
+        - uses: yokawasa/action-setup-kube-tools@v0.9.2
+          with:
+            setup-tools: |
+              kustomize
+            kustomize: '5.2.1'
+        - name: "Update Deployment Image Tag"
+          working-directory: ".argo/hestekur/overlays/dev"
+          run: |
+            kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
+        - name: Commit kustomization and tag version
+          uses: stefanzweifel/git-auto-commit-action@v4
+          with:
+            branch: main
+            commit_message: "ci: Update deployment image tag in dev to ${{ env.VERSION }} [skip ci]"
+            tagging_message: "${{ env.VERSION }}"
+            file_pattern: .argo/*/overlays/dev/kustomization.yaml
+    deploy_test:
+        environment: tst
+        runs-on: ubuntu-latest
+        steps:
+          - name: "Git checkout"
+            uses: "actions/checkout@v4"
+            with:
+              fetch-depth: 0
+              show-progress: false
+          - name: "Git checkout"
+            uses: "actions/checkout@v4"
+            with:
+              fetch-depth: 0
+              show-progress: false
+          - uses: yokawasa/action-setup-kube-tools@v0.9.2
+            with:
+              setup-tools: |
+                kustomize
+              kustomize: '5.2.1'
+          - name: "Update Deployment Image Tag"
+            working-directory: ".argo/hestekur/overlays/tst"
+            run: |
+              kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
+          - name: Commit kustomization and tag version
+            uses: stefanzweifel/git-auto-commit-action@v4
+            with:
+              branch: main
+              commit_message: "ci: Update deployment image tag in tst to ${{ env.VERSION }} [skip ci]"
+              tagging_message: "${{ env.VERSION }}"
+              file_pattern: .argo/*/overlays/tst/kustomization.yaml
+    deploy_prod:
+        environment: prd
+        runs-on: ubuntu-latest
+        steps:
+          - name: "Git checkout"
+            uses: "actions/checkout@v4"
+            with:
+              fetch-depth: 0
+              show-progress: false
+          - name: "Git checkout"
+            uses: "actions/checkout@v4"
+            with:
+              fetch-depth: 0
+              show-progress: false
+          - uses: yokawasa/action-setup-kube-tools@v0.9.2
+            with:
+              setup-tools: |
+                kustomize
+              kustomize: '5.2.1'
+          - name: "Update Deployment Image Tag"
+            working-directory: ".argo/hestekur/overlays/prd"
+            run: |
+              kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
+          - name: Commit kustomization and tag version
+            uses: stefanzweifel/git-auto-commit-action@v4
+            with:
+              branch: main
+              commit_message: "ci: Update deployment image tag in prd to ${{ env.VERSION }} [skip ci]"
+              tagging_message: "${{ env.VERSION }}"
+              file_pattern: .argo/*/overlays/prd/kustomization.yaml

@@ -2,8 +2,9 @@ name: "Prod release"
 on:
   push:
     branches:
-      - main
-    tags: ["v[0-9].[0-9]+.[0-9]+.TEST"]
+      - mainoooooo
+    # message contains "release"
+
 env:
   IMAGE: "eu.gcr.io/entur-system-1287/hest-er-best"
   VERSION: "pr-2"
