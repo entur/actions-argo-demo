@@ -17,7 +17,7 @@ helmCharts:
   valuesInline:
     container:
       image: app-image
-  version: 1.17.3
+  version: 1.17.4
 images:
 - name: app-image
   newName: europe-west1-docker.pkg.dev/ent-getstarted-sbx/getting-started-github-actions/hello-github-actions
