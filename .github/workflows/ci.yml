@@ -25,16 +25,72 @@ jobs:
         name: dev
       runs-on: ubuntu-latest
       steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            auth.docker.io:443
+            dl.google.com:443
+            europe-west1-docker.pkg.dev:443
+            github.com:443
+            iamcredentials.googleapis.com:443
+            index.crates.io:443
+            production.cloudflare.docker.com:443
+            raw.githubusercontent.com:443
+            registry-1.docker.io:443
+            static.rust-lang.org:443
+            sts.googleapis.com:443
+            crates.io:443
+            static.crates.io:443
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
           ref: ${{ env.REF }}
           fetch-depth: 0
           show-progress: false
-      - name: "echo version"
-        run: echo $VERSION
-      - run: |
-          echo "step env: ${{env.name}}"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install musl target
+        run: rustup target add x86_64-unknown-linux-musl
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - run: rustup target add x86_64-unknown-linux-musl
+      - run: cargo build --all --release --target=x86_64-unknown-linux-musl
+      - name: Prepare Binary
+        run: |
+          # reduce size
+          strip target/x86_64-unknown-linux-musl/release/hello-github-actions
+          # move and rename
+          mv target/x86_64-unknown-linux-musl/release/hello-github-actions target/release/hello-github-actions-musl
+          # make executable
+          chmod +x target/release/hello-github-actions-musl
+      - name: "Authenticate with Google Cloud"
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: ${{env.WORKLOAD_IDENTITY_PROVIDER}}
+          service_account: ${{env.SERVICE_ACCOUNT}}
+      # SDK
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+      # Docker config
+      - name: 'Configure Docker with gcloud auth'
+        run: gcloud --quiet auth configure-docker ${{env.DOCKER_URL}}
+      # Docker build
+      - name: "Docker Build"
+        run: |-
+          docker build \
+            --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:latest" \
+            --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{github.sha}}" \
+            --tag "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{env.VERSION}}" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" \
+            .
+      # Docker publish
+      - name: Docker Publish
+        run: |-
+          docker push -a "${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}"
     deploy_dev:
       environment: dev
       outputs:
@@ -125,12 +181,4 @@ jobs:
               tagging_message: "${{ env.VERSION }}"  # only final step should tag
               file_pattern: .argo/*/overlays/prd/kustomization.yaml
           - name: Create Release
-            id: create_release
-            uses: actions/create-release@v1
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              tag_name: ${{ env.VERSION }}
-              release_name: Release ${{ env.VERSION }}
-              draft: false
-              prerelease: false
+            uses: softprops/action-gh-release@v1
