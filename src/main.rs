@@ -1,21 +1,19 @@
-use axum::{routing::get, Router};
-use std::net::SocketAddr;
+use actix_web::{get, web, App, HttpServer, Responder};
 
-#[tokio::main]
-async fn main() {
-    tokio::time::sleep(tokio::time::Duration::from_millis(65000)).await;
-    println!("65000 ms have elapsed");
-    let app = Router::new().route("/", get(handler));
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
-    println!("Server listening on {}", addr);
-    // Use `hyper::server::Server` which is re-exported through `axum::Server` to serve the app.
-    axum::Server::bind(&addr)
-        // Hyper server takes a make service.
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+#[get("/")]
+async fn index() -> impl Responder {
+    "Hello, GitHub Actions!"
 }
 
-async fn handler() -> &'static str {
-    "Hello, GitHub Actions!"
+#[get("/names/{name}")]
+async fn hello(name: web::Path<String>) -> impl Responder {
+    format!("Hello {}!", &name)
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| App::new().service(index).service(hello))
+        .bind(("0.0.0.0", 8080))?
+        .run()
+        .await
 }
