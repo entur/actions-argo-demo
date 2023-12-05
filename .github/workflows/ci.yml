@@ -71,6 +71,8 @@ jobs:
         outputs:
           commit_sha: ${{ steps.auto-commit-action.outputs.commit_sha }}  # for prod
         steps:
+          - run: |
+              echo "last commit sha: ${{needs.deploy_dev.outputs.commit_sha}}"
           - name: "Git checkout"
             uses: "actions/checkout@v4"
             with:
