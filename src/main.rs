@@ -3,8 +3,8 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() {
-    # sleep 65 seconds
-    tokio::time::sleep(std::time::Duration::from_secs(65)).await;
+    tokio::time::sleep(tokio::time::Duration::from_millis(65000)).await;
+    println!("65000 ms have elapsed");
     let app = Router::new().route("/", get(handler));
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     println!("Server listening on {}", addr);
