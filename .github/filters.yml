@@ -1,9 +1,0 @@
-app:
-  - src
-  - build.gradle
-terraform:
-  - terraform
-helm:
-  - helm
-dockerfile:
-  - Dockerfile
