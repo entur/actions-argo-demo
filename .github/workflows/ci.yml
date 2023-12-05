@@ -230,7 +230,7 @@ jobs:
             run: |
               kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
               # generate kustomization.yaml
-              kustomize build . > hestekur-k8s-prod.yaml
+              kustomize build .  --enable-helm > hestekur-k8s-prod.yaml
           - name: Commit kustomization and tag version
             uses: stefanzweifel/git-auto-commit-action@v4
             with:
