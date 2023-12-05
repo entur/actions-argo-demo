@@ -78,7 +78,7 @@ jobs:
         with:
           command: build
           target: x86_64-unknown-linux-musl
-          args: "--locked --release"
+          args: "--release"
           strip: true
       - name: Prepare Binary
         run: |
