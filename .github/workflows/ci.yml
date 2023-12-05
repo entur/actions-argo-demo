@@ -24,6 +24,20 @@ jobs:
       env:
         name: dev
       runs-on: ubuntu-latest
+      permissions:
+        contents: 'write'  # for google auth
+        id-token: 'write' # for google auth
+        actions: none
+        checks: none
+        deployments: none
+        issues: none
+        discussions: none
+        packages: none
+        pages: none
+        pull-requests: none
+        repository-projects: none
+        security-events: none
+        statuses: none
       steps:
       - name: Harden Runner
         uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
@@ -97,6 +111,20 @@ jobs:
         commit_hash: ${{ steps.auto-commit-action.outputs.commit_hash }}  # for test
       needs: ["build"]
       runs-on: ubuntu-latest
+      permissions:
+        contents: 'write'
+        id-token: 'none'
+        actions: none
+        checks: none
+        deployments: none
+        issues: none
+        discussions: none
+        packages: none
+        pages: none
+        pull-requests: none
+        repository-projects: none
+        security-events: none
+        statuses: none
       steps:
         - name: "Git checkout"
           uses: "actions/checkout@v4"
@@ -125,6 +153,20 @@ jobs:
         environment: tst
         needs: ["build", "deploy_dev"]
         runs-on: ubuntu-latest
+        permissions:
+          contents: 'write'
+          id-token: 'none'
+          actions: none
+          checks: none
+          deployments: none
+          issues: none
+          discussions: none
+          packages: none
+          pages: none
+          pull-requests: none
+          repository-projects: none
+          security-events: none
+          statuses: none
         outputs:
           commit_hash: ${{ steps.auto-commit-action.outputs.commit_hash }}  # for prod
         steps:
@@ -157,6 +199,20 @@ jobs:
         environment: prd
         needs: ["build", "deploy_dev", "deploy_test"]
         runs-on: ubuntu-latest
+        permissions:
+          contents: 'write'
+          id-token: 'none'
+          actions: none
+          checks: none
+          deployments: none
+          issues: none
+          discussions: none
+          packages: none
+          pages: none
+          pull-requests: none
+          repository-projects: none
+          security-events: none
+          statuses: none
         steps:
           - name: "Git checkout"
             uses: "actions/checkout@v4"
