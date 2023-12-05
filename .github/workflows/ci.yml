@@ -17,7 +17,7 @@ env:
     WORKLOAD_IDENTITY_PROVIDER: "projects/475080371789/locations/global/workloadIdentityPools/poc-gh-actions-pool/providers/poc-gh-actions-provider"
     SERVICE_ACCOUNT: "github-actions-poc@ent-getstarted-sbx.iam.gserviceaccount.com"
     IMAGE_PATH: "ent-getstarted-sbx/getting-started-github-actions/hello-github-actions"
-
+    REF: ${{ github.head_ref }}
 jobs:
     build:
       environment: dev
@@ -28,6 +28,7 @@ jobs:
       - name: "Git checkout"
         uses: "actions/checkout@v4"
         with:
+          ref: ${{ env.REF }}
           fetch-depth: 0
           show-progress: false
       - name: "echo version"
@@ -36,16 +37,13 @@ jobs:
           echo "step env: ${{env.name}}"
     deploy_dev:
       environment: dev
+      needs: ["build"]
       runs-on: ubuntu-latest
       steps:
         - name: "Git checkout"
           uses: "actions/checkout@v4"
           with:
-            fetch-depth: 0
-            show-progress: false
-        - name: "Git checkout"
-          uses: "actions/checkout@v4"
-          with:
+            ref: ${{ env.REF }}
             fetch-depth: 0
             show-progress: false
         - uses: yokawasa/action-setup-kube-tools@v0.9.2
@@ -58,11 +56,15 @@ jobs:
           run: |
             kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
         - name: Commit kustomization and tag version
+          id: auto-commit-action
           uses: stefanzweifel/git-auto-commit-action@v4
           with:
             branch: main
             commit_message: "ci: Update deployment image tag in dev to ${{ env.VERSION }} [skip ci]"
             file_pattern: .argo/*/overlays/dev/kustomization.yaml
+        - name: Set commit sha
+          id: commit_sha
+          run: echo "REF=${{ steps.auto-commit-action.outputs.commit_sha}}" >> $GITHUB_ENV
     deploy_test:
         environment: tst
         needs: ["build", "deploy_dev"]
@@ -71,11 +73,7 @@ jobs:
           - name: "Git checkout"
             uses: "actions/checkout@v4"
             with:
-              fetch-depth: 0
-              show-progress: false
-          - name: "Git checkout"
-            uses: "actions/checkout@v4"
-            with:
+              ref: ${{ env.REF }}
               fetch-depth: 0
               show-progress: false
           - uses: yokawasa/action-setup-kube-tools@v0.9.2
@@ -88,11 +86,15 @@ jobs:
             run: |
               kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
           - name: Commit kustomization and tag version
+            id: auto-commit-action
             uses: stefanzweifel/git-auto-commit-action@v4
             with:
               branch: main
               commit_message: "ci: Update deployment image tag in tst to ${{ env.VERSION }} [skip ci]"
               file_pattern: .argo/*/overlays/tst/kustomization.yaml
+          - name: Set commit sha
+            id: commit_sha
+            run: echo "REF=${{ steps.auto-commit-action.outputs.commit_sha}}" >> $GITHUB_ENV
     deploy_prod:
         environment: prd
         needs: ["build", "deploy_dev", "deploy_test"]
@@ -101,11 +103,7 @@ jobs:
           - name: "Git checkout"
             uses: "actions/checkout@v4"
             with:
-              fetch-depth: 0
-              show-progress: false
-          - name: "Git checkout"
-            uses: "actions/checkout@v4"
-            with:
+              ref: ${{ env.REF }}
               fetch-depth: 0
               show-progress: false
           - uses: yokawasa/action-setup-kube-tools@v0.9.2
