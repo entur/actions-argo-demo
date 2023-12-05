@@ -37,6 +37,8 @@ jobs:
           echo "step env: ${{env.name}}"
     deploy_dev:
       environment: dev
+      outputs:
+        commit_sha: ${{ steps.auto-commit-action.outputs.commit_sha }}
       needs: ["build"]
       runs-on: ubuntu-latest
       steps:
@@ -62,18 +64,17 @@ jobs:
             branch: main
             commit_message: "ci: Update deployment image tag in dev to ${{ env.VERSION }} [skip ci]"
             file_pattern: .argo/*/overlays/dev/kustomization.yaml
-        - name: Set commit sha
-          id: commit_sha
-          run: echo "REF=${{ steps.auto-commit-action.outputs.commit_sha}}" >> $GITHUB_ENV
     deploy_test:
         environment: tst
         needs: ["build", "deploy_dev"]
         runs-on: ubuntu-latest
+        outputs:
+          commit_sha: ${{ steps.auto-commit-action.outputs.commit_sha }}  # for prod
         steps:
           - name: "Git checkout"
             uses: "actions/checkout@v4"
             with:
-              ref: ${{ env.REF }}
+              ref: ${{ needs.deploy_dev.outputs.commit_sha }}
               fetch-depth: 0
               show-progress: false
           - uses: yokawasa/action-setup-kube-tools@v0.9.2
@@ -103,7 +104,7 @@ jobs:
           - name: "Git checkout"
             uses: "actions/checkout@v4"
             with:
-              ref: ${{ env.REF }}
+              ref: ${{ needs.deploy_test.outputs.commit_sha }}
               fetch-depth: 0
               show-progress: false
           - uses: yokawasa/action-setup-kube-tools@v0.9.2
