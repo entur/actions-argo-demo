@@ -229,6 +229,8 @@ jobs:
             working-directory: ".argo/hestekur/overlays/prd"
             run: |
               kustomize edit set image app-image=${{env.DOCKER_URL}}/${{env.IMAGE_PATH}}:${{ env.VERSION }}
+              # generate kustomization.yaml
+              kustomize build . > hestekur-k8s-prod.yaml
           - name: Commit kustomization and tag version
             uses: stefanzweifel/git-auto-commit-action@v4
             with:
@@ -238,3 +240,12 @@ jobs:
               file_pattern: .argo/*/overlays/prd/kustomization.yaml
           - name: Create Release
             uses: softprops/action-gh-release@v1
+            with:
+              files: |
+                .argo/*/overlays/prd/hestekur-k8s-prod.yaml
+              tag_name: ${{ env.VERSION }}
+              body: |
+                Release ${{ env.VERSION }}
+              draft: false
+              prerelease: false
+              fail_on_unmatched_files: true
