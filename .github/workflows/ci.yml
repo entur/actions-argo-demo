@@ -70,7 +70,7 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - run: rustup target add x86_64-unknown-linux-musl
-      - run: cargo build --all --release --target=x86_64-unknown-linux-musl
+      - run: TARGET_CC=x86_64-linux-musl-gcc cargo build --all --release --target=x86_64-unknown-linux-musl
       - name: Prepare Binary
         run: |
           # reduce size
