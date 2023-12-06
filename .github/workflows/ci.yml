@@ -42,7 +42,7 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
         with:
-          disable-sudo: true
+          disable-sudo: false  # for apt-get musl-tools
           egress-policy: block
           allowed-endpoints: >
             auth.docker.io:443
@@ -73,9 +73,9 @@ jobs:
       #     rustup target add x86_64-unknown-linux-musl
       #     export TARGET_CC=x86_64-linux-musl-gcc
       #     cargo build --all --release --target=x86_64-unknown-linux-musl
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y musl-tools
+      # - run: |
+      #     sudo apt-get update -y
+      #     sudo apt-get install -y musl-tools
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
         with:
