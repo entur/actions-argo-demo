@@ -10,3 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 actix-web = "4"
+
+[target.x86_64-unknown-linux-musl]
+linker = "ld"
+rustflags = ["-Ctarget-feature=-crt-static", "-Clink-self-contained=on", "-L/usr/lib/x86_64-linux-musl", "-Clink-args=--dynamic-linker /lib/ld-musl-x86_64.so.1"]
