@@ -8,14 +8,14 @@ container:
   memory: 128
   probes:
     spec:
-      # startupProbe:
-      #   httpGet:
-      #       path: /
-      #       port: 8080
-      #   initialDelaySeconds: 1
-      #   periodSeconds: 1
-      #   successThreshold: 1
-      #   failureThreshold: 70
+      startupProbe:
+        httpGet:
+            path: /
+            port: 8080
+        initialDelaySeconds: 1
+        periodSeconds: 1
+        successThreshold: 1
+        failureThreshold: 70
       readinessProbe:
         httpGet:
           path: /fail
