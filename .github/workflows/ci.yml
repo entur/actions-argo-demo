@@ -23,7 +23,7 @@ jobs:
       environment: dev
       env:
         name: dev
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-latest
       permissions:
         contents: 'write'  # for google auth
         id-token: 'write' # for google auth
