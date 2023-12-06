@@ -68,21 +68,20 @@ jobs:
       #  uses: dtolnay/rust-toolchain@stable
       - name: Cache
         uses: Swatinem/rust-cache@v2
-      # - name: Install musl target and build
-      #   run: |
-      #     rustup target add x86_64-unknown-linux-musl
-      #     export TARGET_CC=x86_64-linux-musl-gcc
-      #     cargo build --all --release --target=x86_64-unknown-linux-musl
-      # - run: |
-      #     sudo apt-get update -y
-      #     sudo apt-get install -y musl-tools
-      - name: Build binary
-        uses: houseabsolute/actions-rust-cross@v0
-        with:
-          command: build
-          target: x86_64-unknown-linux-musl
-          args: "--release"
-          strip: true
+      - name: Install musl target and build
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y musl-tools
+          rustup target add x86_64-unknown-linux-musl
+          export TARGET_CC=x86_64-linux-musl-gcc
+          cargo build --all --release --target=x86_64-unknown-linux-musl
+#      - name: Build binary
+#        uses: houseabsolute/actions-rust-cross@v0
+#        with:
+#          command: build
+#          target: x86_64-unknown-linux-musl
+#          args: "--release"
+#          strip: true
       - name: Prepare Binary
         run: |
           # reduce size
